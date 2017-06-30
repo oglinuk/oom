@@ -29,11 +29,9 @@ def main():
     # https://stackoverflow.com/a/29811379
     mem_info_available = 'awk \'$3=="kB"{$2=$2/1024;$3="MB"} 1\' /proc/meminfo | grep "MemAvailable:"'
     # https://www.cyberciti.biz/faq/linux-ethernet-statistics/
-    # transmitted bytes
     tx_bytes = 'ifconfig apcli0 | awk \'{print $5 $6}\' | grep "TXbytes:"'
-    rx_bytes = 'ifconfig apcli0 | awk \'{print $1 $2}\' | grep "RXbytes:"'
-    # transmitted packets
     tx_packets = 'ifconfig apcli0 | awk \'{print $1 $2}\' | grep "TXpackets:"'
+    rx_bytes = 'ifconfig apcli0 | awk \'{print $1 $2}\' | grep "RXbytes:"'
     rx_packets = 'ifconfig apcli0 | awk \'{print $1 $2}\' | grep "RXpackets:"'
 
     while True:
