@@ -1,13 +1,23 @@
 '''
-Onion Omega 2 Monitor
+Onion Omega 2 Monitor v0.1
 
 Program that periodically monitors, records, and stores information about the Onion Omega 2
 
 Github.com/OGLinuk/oom
+
+Update - v0.2
+    Cut out unnecessary code
+    Added processCommunication() method to cut out repetitive code
 '''
 import subprocess
 import time
 import logging
+
+def processCommunication(prSubprocess):
+    # https://stackoverflow.com/a/3503909
+    _proc = subprocess.Popen(['%s' % (prSubprocess)], stdout=subprocess.PIPE, shell=True)
+    exe_proc = _proc.communicate()
+    return exe_proc
 
 def main():
 
@@ -29,70 +39,44 @@ def main():
     # https://stackoverflow.com/a/29811379
     mem_info_available = 'awk \'$3=="kB"{$2=$2/1024;$3="MB"} 1\' /proc/meminfo | grep "MemAvailable:"'
     # https://www.cyberciti.biz/faq/linux-ethernet-statistics/
+    # transmitted bytes
     tx_bytes = 'ifconfig apcli0 | awk \'{print $5 $6}\' | grep "TXbytes:"'
-    tx_packets = 'ifconfig apcli0 | awk \'{print $1 $2}\' | grep "TXpackets:"'
     rx_bytes = 'ifconfig apcli0 | awk \'{print $1 $2}\' | grep "RXbytes:"'
+    # transmitted packets
+    tx_packets = 'ifconfig apcli0 | awk \'{print $1 $2}\' | grep "TXpackets:"'
     rx_packets = 'ifconfig apcli0 | awk \'{print $1 $2}\' | grep "RXpackets:"'
 
     while True:
-        # https://stackoverflow.com/a/3503909
-        ipv4_omega2_proc = subprocess.Popen([ipv4_omega2], stdout=subprocess.PIPE, shell=True)
-        _ipv4_omega2 = ipv4_omega2_proc.communicate()
-
-        uptime_proc = subprocess.Popen([uptime_omega2], stdout=subprocess.PIPE, shell=True)
-        _uptime_omega2 = uptime_proc.communicate()
-
-        cpu_proc = subprocess.Popen([cpu_usage], stdout=subprocess.PIPE, shell=True)
-        _cpu = cpu_proc.communicate()
-
-        usage_mem_proc = subprocess.Popen([mem_info_usage], stdout=subprocess.PIPE, shell=True)
-        _mem_usage = usage_mem_proc.communicate()
-
-        available_mem_proc = subprocess.Popen([mem_info_available], stdout=subprocess.PIPE, shell=True)
-        _mem_available = available_mem_proc.communicate()
-
-        tx_bytes_proc = subprocess.Popen([tx_bytes], stdout=subprocess.PIPE, shell=True)
-        _tx_bytes = tx_bytes_proc.communicate()
-
-        rx_bytes_proc = subprocess.Popen([rx_bytes], stdout=subprocess.PIPE, shell=True)
-        _rx_bytes = rx_bytes_proc.communicate()
-
-        tx_packets_proc = subprocess.Popen([tx_packets], stdout=subprocess.PIPE, shell=True)
-        _tx_packets = tx_packets_proc.communicate()
-
-        rx_packets_proc = subprocess.Popen([rx_packets], stdout=subprocess.PIPE, shell=True)
-        _rx_packets = rx_packets_proc.communicate()
-
-        # https://stackoverflow.com/a/43680634
-        ipv4 = b'%s' % (_ipv4_omega2[0])
-        uptime = b'%s' % (_uptime_omega2[0])
-        cpu = b'%s' % (_cpu[0])
-        mem_usage = b'%s' % (_mem_usage[0])
-        mem_available = b'%s' % (_mem_available[0])
-        TXbytes = b'%s' % (_tx_bytes[0])
-        RXbytes = b'%s' % (_rx_bytes[0])
-        TXpackets = b'%s' % (_tx_packets[0])
-        RXpackets = b'%s' % (_rx_packets[0])
+        # System variables
+        _ipv4_omega2 = processCommunication(ipv4_omega2)
+        _uptime_omega2 = processCommunication(uptime_omega2)
+        _cpu = processCommunication(cpu_usage)
+        _mem_usage = processCommunication(mem_info_usage)
+        _mem_available = processCommunication(mem_info_available)
+        _tx_bytes = processCommunication(tx_bytes)
+        _rx_bytes = processCommunication(rx_bytes)
+        _tx_packets = processCommunication(tx_packets)
+        _rx_packets = processCommunication(rx_packets)
 
         print()
-        print(ipv4.decode('UTF-8'))
-        print('Uptime(M): %s' % (uptime.decode('UTF-8')))
-        logger.info('Uptime: %s' % (uptime.decode('UTF-8')))
-        print('CPU Usage: %s' % (cpu.decode('UTF-8')))
-        logger.info('CPU Usage: %s' % (cpu.decode('UTF-8')))
-        print('Memory Usage: %s' % (mem_usage.decode('UTF-8')))
-        logger.info('Memory Usage: %s' % (mem_usage.decode('UTF-8')))
-        print(mem_available.decode('UTF-8'))
-        logger.info('%s' % (mem_available.decode('UTF-8')))
-        print(TXbytes.decode('UTF-8'))
-        logger.info('%s' % (TXbytes.decode('UTF-8')))
-        print(TXpackets.decode('UTF-8'))
-        logger.info('%s' % (TXpackets.decode('UTF-8')))
-        print(RXbytes.decode('UTF-8'))
-        logger.info('%s' % (RXbytes.decode('UTF-8')))
-        print(RXpackets.decode('UTF-8'))
-        logger.info('%s' % (RXpackets.decode('UTF-8')))
-        print('-----------------------------')
+        print('IPv4: %s' % (str(_ipv4_omega2[0], 'UTF-8')))
+        print('Uptime (M): %s' % (str(_uptime_omega2[0], 'UTF-8')))
+        logger.info('Uptime: %s' % (str(_uptime_omega2[0], 'UTF-8')))
+        print('CPU Usage: %s' % (str(_cpu[0], 'UTF-8')))
+        logger.info('CPU Usage: %s' % (str(_cpu[0], 'UTF-8')))
+        print('Memory Usage: %s' % (str(_mem_usage[0], 'UTF-8')))
+        logger.info('Memory Usage: %s' % (str(_mem_usage[0], 'UTF-8')))
+        print('%s' % (str(_mem_available[0], 'UTF-8')))
+        logger.info('%s' % (str(_mem_available[0], 'UTF-8')))
+        print(str(_tx_bytes[0], 'UTF-8'))
+        logger.info('%s' % (str(_tx_bytes[0], 'UTF-8')))
+        print(str(_tx_packets[0], 'UTF-8'))
+        logger.info('%s' % (str(_tx_packets[0], 'UTF-8')))
+        print(str(_rx_bytes[0], 'UTF-8'))
+        logger.info('%s' % (str(_rx_bytes[0], 'UTF-8')))
+        print(str(_rx_packets[0], 'UTF-8'))
+        logger.info('%s' % (str(_rx_packets[0], 'UTF-8')))
+        print('----------------------------')
         time.sleep(0.5)
 
 if __name__ == '__main__':
