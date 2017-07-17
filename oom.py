@@ -47,7 +47,6 @@ def main():
     rx_packets = 'ifconfig apcli0 | awk \'{print $1 $2}\' | grep "RXpackets:"'
 
     while True:
-        # System variables
         _ipv4_omega2 = processCommunication(ipv4_omega2)
         _uptime_omega2 = processCommunication(uptime_omega2)
         _cpu = processCommunication(cpu_usage)
